@@ -29,7 +29,9 @@ definition(
 
 preferences {
     input name: "nvrAddress", type: "text", title: "NVR Address", description: "NVR IP address", required: true, displayDuringSetup: true, defaultValue: "10.0.0.205"
+    input name: "nvrPublicAddress", type: "text", title: "NVR Public Address", description: "NVR Public IP address", required: true, displayDuringSetup: true, defaultValue: ""
     input name: "nvrPort", type: "number", title: "NVR Port", description: "NVR HTTP port", required: true, displayDuringSetup: true, defaultValue: 7080
+    input name: "rtspPort", type: "number", title: "RTSP Port", description: "NVR RTSP port", required: true, displayDuringSetup: true, defaultValue: 7447
     input name: "username", type: "text", title: "Username", description: "Username", required: true, displayDuringSetup: true, defaultValue: "test@project802.net"
     input name: "password", type: "text", title: "Password", description: "Password", required: true, displayDuringSetup: true, defaultValue: "unifitest"
 }
@@ -224,4 +226,16 @@ def _getApiKey()
 def _getNvrTarget()
 {
     return state.nvrTarget
+}
+/**
+ * _getNvrRTSP() - Here for the purpose of children
+ */
+def _getNvrRTSP(){
+	return "${settings.nvrAddress}:${settings.rtspPort}"
+}
+/**
+ * _getNvrPublicRTSP() - Here for the purpose of children
+ */
+def _getNvrPublicRTSP(){
+	return "${settings.nvrPublicAddress}:${settings.rtspPort}"
 }
