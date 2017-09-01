@@ -22,6 +22,11 @@ metadata {
         capability "Sensor"
         capability "Refresh"
         capability "Image Capture"
+        capability "Video Camera"
+		capability "Video Capture"
+		capability "Switch"
+        
+        command "start"
     }
     
     simulator {
@@ -29,7 +34,7 @@ metadata {
     }
     
     tiles( scale: 2 ) {
-        carouselTile("cameraSnapshot", "device.image", width: 6, height: 4) { }
+    	carouselTile("cameraSnapshot", "device.image", width: 6, height: 4) { }
         
         standardTile("take", "device.image", width: 2, height: 2, canChangeIcon: false, inactiveLabel: true, canChangeBackground: false) {
             state "take", label: "Take", action: "Image Capture.take", icon: "st.camera.camera", backgroundColor: "#FFFFFF", nextState:"taking"
@@ -47,8 +52,36 @@ metadata {
             state( "DISCONNECTED", label: "Disconnected", icon: "st.samsung.da.RC_ic_power", backgroundColor: "#ffffff" )
         }
         
+        multiAttributeTile(name: "videoPlayerMin", type: "videoPlayer", width: 6, height: 4) {
+			tileAttribute("device.switch", key: "CAMERA_STATUS") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", action: "switch.off", backgroundColor: "#00A0DC", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", action: "switch.on", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", action: "refresh.refresh", backgroundColor: "#cccccc")
+			}
+
+			tileAttribute("device.errorMessage", key: "CAMERA_ERROR_MESSAGE") {
+				attributeState("errorMessage", label: "", value: "", defaultState: true)
+			}
+
+			tileAttribute("device.camera", key: "PRIMARY_CONTROL") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", backgroundColor: "#cccccc")
+			}
+
+			tileAttribute("device.startLive", key: "START_LIVE") {
+				attributeState("live", action: "start", defaultState: true)
+			}
+
+			tileAttribute("device.stream", key: "STREAM_URL") {
+				attributeState("activeURL", defaultState: true)
+			}
+		}
+        
         main( "motion" )
-        details( "cameraSnapshot", "take", "motion", "connectionStatus" )
+        details( "cameraSnapshot", "take", "motion", "connectionStatus","videoPlayerMin" )
     }
     
     preferences {
@@ -379,4 +412,29 @@ private _generatePictureName()
     def picName = device.deviceNetworkId.replaceAll(':', '') + "_$pictureUuid" + ".jpg"
     
     return picName
+}
+
+def start() {
+	log.trace "start()"
+    def target = parent._getNvrRTSP()
+    def publicTarget = parent._getNvrPublicRTSP()
+    //log.debug ( "start: ${target}" )
+	def dataLiveVideo = [
+		OutHomeURL  : "rtsp://${publicTarget}/${state.id}_2",
+		InHomeURL   : "rtsp://${target}/${state.id}_2",
+		ThumbnailURL: "http://cdn.device-icons.smartthings.com/camera/dlink-indoor@2x.png",
+		cookie      : [key: "key", value: "value"]
+	]
+
+	def event = [
+		name           : "stream",
+		value          : groovy.json.JsonOutput.toJson(dataLiveVideo).toString(),
+		data		   : groovy.json.JsonOutput.toJson(dataLiveVideo),
+		descriptionText: "Starting the livestream",
+		eventType      : "VIDEO",
+		displayed      : false,
+		isStateChange  : true
+	]
+    log.debug ( dataLiveVideo )
+	sendEvent(event)
 }
