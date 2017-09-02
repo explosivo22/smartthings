@@ -23,8 +23,8 @@ metadata {
         capability "Refresh"
         capability "Image Capture"
         capability "Video Camera"
-		capability "Video Capture"
-		capability "Switch"
+		    capability "Video Capture"
+		    capability "Switch"
 
         command "start"
     }
