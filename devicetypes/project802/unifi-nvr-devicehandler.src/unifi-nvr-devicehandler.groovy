@@ -23,8 +23,8 @@ metadata {
         capability "Refresh"
         capability "Image Capture"
         capability "Video Camera"
-        capability "Video Capture"
-        capability "Switch"
+		capability "Video Capture"
+		capability "Switch"
 
         command "start"
     }
@@ -53,36 +53,36 @@ metadata {
         }
 
         multiAttributeTile(name: "videoPlayerMin", type: "videoPlayer", width: 6, height: 4) {
-        	tileAttribute("device.switch", key: "CAMERA_STATUS") {
-        		attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", action: "switch.off", backgroundColor: "#00A0DC", defaultState: true)
-        		attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", action: "switch.on", backgroundColor: "#ffffff")
-        		attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC")
-        		attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", action: "refresh.refresh", backgroundColor: "#cccccc")
-        	}
+			tileAttribute("device.switch", key: "CAMERA_STATUS") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", action: "switch.off", backgroundColor: "#00A0DC", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", action: "switch.on", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", action: "refresh.refresh", backgroundColor: "#cccccc")
+			}
 
-        	tileAttribute("device.errorMessage", key: "CAMERA_ERROR_MESSAGE") {
-        		attributeState("errorMessage", label: "", value: "", defaultState: true)
-        	}
+			tileAttribute("device.errorMessage", key: "CAMERA_ERROR_MESSAGE") {
+				attributeState("errorMessage", label: "", value: "", defaultState: true)
+			}
 
-        	tileAttribute("device.camera", key: "PRIMARY_CONTROL") {
-        		attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC", defaultState: true)
-        		attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", backgroundColor: "#ffffff")
-        		attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC")
-        		attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", backgroundColor: "#cccccc")
-        	}
+			tileAttribute("device.camera", key: "PRIMARY_CONTROL") {
+				attributeState("on", label: "Active", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC", defaultState: true)
+				attributeState("off", label: "Inactive", icon: "st.camera.dlink-indoor", backgroundColor: "#ffffff")
+				attributeState("restarting", label: "Connecting", icon: "st.camera.dlink-indoor", backgroundColor: "#00A0DC")
+				attributeState("unavailable", label: "Unavailable", icon: "st.camera.dlink-indoor", backgroundColor: "#cccccc")
+			}
 
-        	tileAttribute("device.startLive", key: "START_LIVE") {
-        		attributeState("live", action: "start", defaultState: true)
-        	}
+			tileAttribute("device.startLive", key: "START_LIVE") {
+				attributeState("live", action: "start", defaultState: true)
+			}
 
-        	tileAttribute("device.stream", key: "STREAM_URL") {
-        		attributeState("activeURL", defaultState: true)
-        	}
-        }
+			tileAttribute("device.stream", key: "STREAM_URL") {
+				attributeState("activeURL", defaultState: true)
+			}
+		}
 
-            main( "videoPlayerMin" )
-            details( "cameraSnapshot", "take", "motion", "connectionStatus","videoPlayerMin" )
-      }
+        main( "videoPlayerMin" )
+        details( "videoPlayerMin", "take", "motion", "connectionStatus" )
+    }
 
     preferences {
         input "pollInterval", "number", title: "Poll Interval", description: "Polling interval in seconds for motion detection", defaultValue: 5
@@ -429,7 +429,7 @@ def start() {
 	def event = [
 		name           : "stream",
 		value          : groovy.json.JsonOutput.toJson(dataLiveVideo).toString(),
-		data		   : groovy.json.JsonOutput.toJson(dataLiveVideo),
+		data           : groovy.json.JsonOutput.toJson(dataLiveVideo),
 		descriptionText: "Starting the livestream",
 		eventType      : "VIDEO",
 		displayed      : false,
