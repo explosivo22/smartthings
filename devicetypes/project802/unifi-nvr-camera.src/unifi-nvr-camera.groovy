@@ -429,7 +429,7 @@ def start() {
 	def event = [
 		name           : "stream",
 		value          : groovy.json.JsonOutput.toJson(dataLiveVideo).toString(),
-		data		   : groovy.json.JsonOutput.toJson(dataLiveVideo),
+		data		       : groovy.json.JsonOutput.toJson(dataLiveVideo),
 		descriptionText: "Starting the livestream",
 		eventType      : "VIDEO",
 		displayed      : false,
