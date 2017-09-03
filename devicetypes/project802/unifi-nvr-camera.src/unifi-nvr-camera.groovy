@@ -81,7 +81,7 @@ metadata {
 		}
 
         main( "videoPlayerMin" )
-        details( "videoPlayerMin", "take", "motion", "connectionStatus" )
+        details( "videoPlayerMin", "take", "motion", "connectionStatus", "cameraSnapshot" )
     }
 
     preferences {
