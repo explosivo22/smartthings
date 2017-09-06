@@ -417,7 +417,7 @@ private _generatePictureName()
 def start() {
 	log.trace "start()"
     def target = parent._getNvrRTSP()
-    if(parent._getNvrPublicRTSP() == null){
+    if(parent._getNvrPublicRTSP() == "null:7447"){
       log.debug("null: ", parent._getNvrPublicRTSP())
       def publicTarget = parent._getNvrRTSP()
     }else{
