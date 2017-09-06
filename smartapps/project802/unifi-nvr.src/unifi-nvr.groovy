@@ -13,7 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *  —————————————————————————————————————————————————————————
- * 
+ *
  *  For more information, see https://github.com/project802/smartthings/unifi_nvr
  */
 definition(
@@ -29,7 +29,7 @@ definition(
 
 preferences {
     input name: "nvrAddress", type: "text", title: "NVR Address", description: "NVR IP address", required: true, displayDuringSetup: true, defaultValue: "10.0.0.205"
-    input name: "nvrPublicAddress", type: "text", title: "NVR Public Address", description: "NVR Public IP address", required: true, displayDuringSetup: true, defaultValue: ""
+    input name: "nvrPublicAddress", type: "text", title: "NVR Public Address", description: "NVR Public IP address", required: false, displayDuringSetup: true, defaultValue: null
     input name: "nvrPort", type: "number", title: "NVR Port", description: "NVR HTTP port", required: true, displayDuringSetup: true, defaultValue: 7080
     input name: "rtspPort", type: "number", title: "RTSP Port", description: "NVR RTSP port", required: true, displayDuringSetup: true, defaultValue: 7447
     input name: "username", type: "text", title: "Username", description: "Username", required: true, displayDuringSetup: true, defaultValue: "test@project802.net"
@@ -48,7 +48,7 @@ def installed() {
  */
 def updated() {
     log.info "UniFi NVR: updated with settings: ${settings}"
-    
+
     nvr_initialize()
 }
 
@@ -60,7 +60,7 @@ def nvr_initialize()
     state.nvrName = "Unknown"
     state.loginCookie = null;
     state.apiKey = "";
-    
+
     state.nvrTarget = "${settings.nvrAddress}:${settings.nvrPort}"
     log.info "nvr_initialize: NVR API is located at ${state.nvrTarget}"
 
@@ -74,11 +74,11 @@ def nvr_initialize()
                 "Host":"${state.nvrTarget}",
                 "Accept":"application/json",
                 "Content-Type":"application/json"
-            ]        
+            ]
         ],
         null,
         [
-            callback: nvr_loginCallback 
+            callback: nvr_loginCallback
         ]
     );
 
@@ -95,15 +95,15 @@ def nvr_loginCallback( physicalgraph.device.HubResponse hubResponse )
         log.error "nvr_loginCallback: unable to login.  Please check IP, username and password.  Status ${hubResponse.status}.";
         return;
     }
-    
+
     String setCookieHeader = hubResponse?.headers['set-cookie'];
-    
+
     if( !setCookieHeader )
     {
         log.error "nvr_loginCallback: no headers found for login token.  Please check IP, username and password.";
         return;
     }
-    
+
     // JSESSIONID_AV is the login cookie we need to use for other API calls
     def cookies = setCookieHeader.split(";").inject([:]) { cookies, item ->
         def nameAndValue = item.split("=");
@@ -112,7 +112,7 @@ def nvr_loginCallback( physicalgraph.device.HubResponse hubResponse )
             state.loginCookie = nameAndValue[1];
         }
     }
-    
+
     if( !state.loginCookie )
     {
         log.error "nvr_loginCallback: unable to login.  Please check IP, username and password.";
@@ -123,26 +123,26 @@ def nvr_loginCallback( physicalgraph.device.HubResponse hubResponse )
     {
         log.info "nvr_loginCallback: login successful!";
     }
-    
+
     // If there is no API key or its off, the cameras won't work.
     // [todo] add API key validation in SmartApp?
     state.apiKey = hubResponse.json?.data?.apiKey[0];
-    
+
     def hubAction = new physicalgraph.device.HubAction(
         [
             path: "/api/2.0/bootstrap",
             method: "GET",
             HOST: state.nvrTarget,
-            headers: [ 
-                "Host":"${state.nvrTarget}", 
-                "Accept":"application/json", 
+            headers: [
+                "Host":"${state.nvrTarget}",
+                "Accept":"application/json",
                 "Content-Type":"application/json",
                 "Cookie":"JSESSIONID_AV=${state.loginCookie}"
-            ]        
+            ]
         ],
         null,
         [
-            callback: nvr_bootstrapPollCallback 
+            callback: nvr_bootstrapPollCallback
         ]
     );
 
@@ -155,30 +155,30 @@ def nvr_loginCallback( physicalgraph.device.HubResponse hubResponse )
 def nvr_bootstrapPollCallback( physicalgraph.device.HubResponse hubResponse )
 {
     def data = hubResponse.json?.data
-    
+
     if( !data || !data.isLoggedIn )
     {
     	log.error "nvr_bootstrapPollCallback: unable to get data from NVR!"
         return
     }
-    
+
     if( data.isLoggedIn[0] != true )
     {
     	log.error "nvr_bootstrapPollCallback: unable to log in!  Please check API key."
         return
     }
-    
+
     state.nvrName = data.servers[0].name[0]
     log.info "nvr_bootstrapPollCallback: response from ${state.nvrName}"
-    
+
     def camerasProcessed = 0
-    
+
     data.cameras[0].each { camera ->
         def dni = "${camera.mac}"
         def child = getChildDevice( dni )
-        
+
         ++camerasProcessed
-        
+
         if( child )
         {
             log.info "nvr_bootstrapPollCallback: already have child ${dni}"
@@ -196,9 +196,9 @@ def nvr_bootstrapPollCallback( physicalgraph.device.HubResponse hubResponse )
                                    "id" : camera.platform ? camera._id : camera.uuid
                                ]
                            ]
-                           
+
             log.info "nvr_bootstrapPollCallback: adding child ${dni} ${metaData}"
-            
+
             try
             {
                 addChildDevice( "project802", "UniFi NVR Camera", dni, location.hubs[0].id, metaData )
@@ -209,7 +209,7 @@ def nvr_bootstrapPollCallback( physicalgraph.device.HubResponse hubResponse )
             }
         }
     }
-    
+
     log.info "nvr_bootstrapPollCallback: processed ${camerasProcessed} cameras"
 }
 
