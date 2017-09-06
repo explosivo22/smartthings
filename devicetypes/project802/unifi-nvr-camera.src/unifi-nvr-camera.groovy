@@ -418,8 +418,10 @@ def start() {
 	log.trace "start()"
     def target = parent._getNvrRTSP()
     if(parent._getNvrPublicRTSP() == null){
+      log.debug("null: ", parent._getNvrPublicRTSP())
       def publicTarget = parent._getNvrRTSP()
     }else{
+      log.debug("not null: ", parent._getNvrPublicRTSP())
       def publicTarget = parent._getNvrPublicRTSP()
     }
 
