@@ -417,7 +417,12 @@ private _generatePictureName()
 def start() {
 	log.trace "start()"
     def target = parent._getNvrRTSP()
-    def publicTarget = parent._getNvrPublicRTSP()
+    if(parent._getNvrPublicRTSP() == null){
+      def publicTarget = parent._getNvrRTSP()
+    }else{
+      def publicTarget = parent._getNvrPublicRTSP()
+    }
+
     //log.debug ( "start: ${target}" )
 	def dataLiveVideo = [
 		OutHomeURL  : "rtsp://${publicTarget}/${state.id}_2",
